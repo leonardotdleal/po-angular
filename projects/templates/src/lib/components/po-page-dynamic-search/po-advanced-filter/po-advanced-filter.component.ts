@@ -1,4 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { PoDynamicFormComponent, PoLanguageService } from '@po-ui/ng-components';
 
@@ -21,17 +22,43 @@ import { PoPageDynamicSearchFilters } from '../po-page-dynamic-search-filters.in
   selector: 'po-advanced-filter',
   templateUrl: './po-advanced-filter.component.html'
 })
-export class PoAdvancedFilterComponent extends PoAdvancedFilterBaseComponent {
+export class PoAdvancedFilterComponent extends PoAdvancedFilterBaseComponent implements OnDestroy, OnInit {
+  private _subscription = new Subscription();
+
   @ViewChild(PoDynamicFormComponent, { static: true }) poDynamicForm: PoDynamicFormComponent;
 
   constructor(languageService: PoLanguageService) {
     super(languageService);
   }
 
+  ngOnInit() {
+    this.objectValueSubscribe();
+  }
+
+  ngOnDestroy() {
+    this._subscription.unsubscribe();
+  }
+
   open() {
     this.filter = this.keepFilters ? this.getInitialValuesFromFilter(this.filters) : {};
 
     this.poModal.open();
+  }
+
+  private objectValueSubscribe() {
+    this._subscription.add(
+      this.poDynamicForm.getObjectValue().subscribe(valueAsObject => {
+        if (valueAsObject) {
+          this.getOptionsServiceItem(valueAsObject);
+        }
+      })
+    );
+  }
+
+  private getOptionsServiceItem(valueAsObject) {
+    if (!this.optionsServiceChosenOptions.includes(valueAsObject)) {
+      this.optionsServiceChosenOptions = [...this.optionsServiceChosenOptions, valueAsObject];
+    }
   }
 
   private getInitialValuesFromFilter(filters: Array<PoPageDynamicSearchFilters>) {

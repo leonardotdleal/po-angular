@@ -52,11 +52,11 @@ export class PoAdvancedFilterBaseComponent {
 
   filter = {};
   language: string = poLocaleDefault;
+  optionsServiceChosenOptions = [];
 
   primaryAction: PoModalAction = {
     action: () => {
       const models = this.getValuesFromForm();
-
       this.searchEvent.emit(models);
       this.poModal.close();
     },
@@ -119,11 +119,22 @@ export class PoAdvancedFilterBaseComponent {
   // Retorna os models dos campos preenchidos
   private getValuesFromForm() {
     Object.keys(this.filter).forEach(property => {
+      if (this.optionsServiceChosenOptions.length) {
+        this.filter[property] = this.applyDisclaimerLabelValueToOptionService(property);
+      }
+
       if (this.filter[property] === undefined || this.filter[property] === '') {
         delete this.filter[property];
       }
     });
 
     return this.filter;
+  }
+
+  // Para o caso de combo é necessário fazer o tratamento para troca do value por label para exibição correta no disclaimer e filtro de busca.
+  private applyDisclaimerLabelValueToOptionService(property: string) {
+    const result = this.optionsServiceChosenOptions.find(option => option.value === this.filter[property]);
+
+    return result?.label || result?.value;
   }
 }
