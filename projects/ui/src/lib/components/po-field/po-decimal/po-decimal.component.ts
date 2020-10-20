@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { AbstractControl, NG_VALUE_ACCESSOR, NG_VALIDATORS } from '@angular/forms';
-
+import { PoLanguageService } from '../../../services/po-language/po-language.service';
 import { convertToInt } from '../../../utils/util';
 import { PoInputBaseComponent } from '../po-input/po-input-base.component';
 
@@ -69,18 +69,15 @@ export class PoDecimalComponent extends PoInputBaseComponent implements AfterVie
   private _decimalsLength?: number = poDecimalDefaultDecimalsLength;
   private _thousandMaxlength?: number = poDecimalDefaultThousandMaxlength;
 
-  private decimalSeparator: string = ',';
+  private decimalSeparator: string;
   private fireChange: boolean = false;
   private isKeyboardAndroid: boolean = false;
   private minusSign: string = '-';
   private oldDotsLength = null;
-  private thousandSeparator: string = '.';
+  private thousandSeparator: string;
   private valueBeforeChange: any;
 
-  private regex = {
-    thousand: new RegExp('\\' + '.', 'g'),
-    decimal: new RegExp('\\' + ',', 'g')
-  };
+  private regex;
 
   @ViewChild('inp', { read: ElementRef, static: true }) inputEl: ElementRef;
 
@@ -157,9 +154,22 @@ export class PoDecimalComponent extends PoInputBaseComponent implements AfterVie
     return this._thousandMaxlength;
   }
 
-  constructor(private el: ElementRef) {
+  constructor(private el: ElementRef, private poLanguageService: PoLanguageService) {
     super();
     this.isKeyboardAndroid = !!navigator.userAgent.match(/Android/i);
+    this.setNumbersSeparators();
+  }
+
+  setNumbersSeparators() {
+    const { decimalSeparator, thousandSeparator } = this.poLanguageService.getNumberSeparators();
+    console.log(decimalSeparator);
+    console.log(thousandSeparator);
+    this.decimalSeparator = decimalSeparator;
+    this.thousandSeparator = thousandSeparator;
+    this.regex = {
+      thousand: new RegExp('\\' + this.thousandSeparator, 'g'),
+      decimal: new RegExp('\\' + this.decimalSeparator, 'g')
+    };
   }
 
   ngAfterViewInit() {

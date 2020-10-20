@@ -1,0 +1,31 @@
+<po-page-default
+    p-title="Teste Heroes">
+
+    <po-info class="po-md-2"
+            p-label="Herói"
+            [p-value]="hero.label">
+    </po-info>
+
+    <po-info class="po-md-2"
+            p-label="ID"
+            [p-value]="hero.value | number ">
+    </po-info>
+
+    <po-info class="po-md-2"
+            p-label="Salário"
+            [p-value]="hero.salary | number ">
+    </po-info>
+
+    <po-decimal class="po-md-2"
+        p-label="Salário"
+        [(ngModel)]="hero.salary">
+    </po-decimal>
+
+    <!-- [(ngModel)]="hero.value"-->
+
+    <po-table class="po-md-12"
+        [p-columns]="heroesColumns"
+        [p-items]="heroesItems">
+    </po-table>
+
+</po-page-default>

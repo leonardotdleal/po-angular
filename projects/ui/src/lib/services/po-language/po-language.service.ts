@@ -1,7 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 
 import { getBrowserLanguage, getShortLanguage, isLanguage } from '../../utils/util';
-import { poLocaleDefault, poLocales } from './po-language.constant';
+import {
+  poLocaleDecimalSeparatorList,
+  poLocaleDefault,
+  poLocales,
+  poLocaleThousandSeparatorList
+} from './po-language.constant';
 
 const poDefaultLanguage = 'PO_DEFAULT_LANGUAGE';
 const poLocaleKey = 'PO_USER_LOCALE';
@@ -17,6 +22,8 @@ const poLocaleKey = 'PO_USER_LOCALE';
   providedIn: 'root'
 })
 export class PoLanguageService {
+  constructor(@Inject(LOCALE_ID) private locale_app: string) {}
+
   set languageDefault(language: string) {
     if (language && isLanguage(language)) {
       localStorage.setItem(poDefaultLanguage, language);
@@ -46,7 +53,8 @@ export class PoLanguageService {
    * **Retorno:** `string` com a sigla do idioma ativo.
    */
   getLanguage(): string {
-    const language = localStorage.getItem(poLocaleKey) || this.languageDefault || getBrowserLanguage();
+    const language =
+      localStorage.getItem(poLocaleKey) || this.languageDefault || this.locale_app || getBrowserLanguage();
 
     return language && language.toLowerCase();
   }
@@ -117,5 +125,28 @@ export class PoLanguageService {
    */
   setLanguageDefault(language: string): void {
     this.languageDefault = language;
+  }
+
+  /**
+   * @description
+   *
+   * Método que retorna o separador
+   *
+   * > Ao definir um idioma por este serviço, apenas o módulo do i18n referente a esta configuração utilizará o idioma definido.
+   *
+   * @param language sigla do idioma.
+   *
+   * Esta sigla deve ser composta por duas letras representando o idioma,
+   * podendo ser adicionado outras duas letras representando o país, por exemplo: `pt`, `pt-BR`, `pt-br`, `en` ou `en-US`.
+   *
+   * > Caso seja informado um valor diferente deste padrão, o mesmo será ignorado.
+   */
+  getNumberSeparators() {
+    const decimal = poLocaleDecimalSeparatorList.find(separator => separator.language === this.getLanguage()) ?? {};
+    const thousand = poLocaleThousandSeparatorList.find(separator => separator.language === this.getLanguage()) ?? {};
+    const decimalSeparator = decimal?.separator ?? ',';
+    const thousandSeparator = thousand?.separator ?? '.';
+
+    return { decimalSeparator, thousandSeparator };
   }
 }
